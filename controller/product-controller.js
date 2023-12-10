@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 
 async function getProduct(req, res) {
-    // const {name, price, ingredient, desc, photoProduct} = res.body;
+    // const {name, harga, bahan, description, pd_image} = res.body;
     try {
         const getResponse = await query(
             `
@@ -18,26 +18,35 @@ async function getProduct(req, res) {
 }
 
 async function getProductById(req, res) {
+    const {id} = req.body;
     try {
-        
+        const cekId = await query(
+            `
+                SELECT name, harga, bahan, description, pd_image FROM products 
+                WHERE id = ?;
+            `,
+            [id]
+            // [req.params.id]
+        );
+        res.status(200).json("produk ditemukan");
     } catch (error) {
         return res.status(400).json("Ada yang salah");
     }
 }
 
 async function saveProduct(req, res) {
-    const {name, price, ingredient, desc, photoProduct} = req.body;
+    const {name, harga, bahan, description, pd_image} = req.body;
     if (
         name === undefined||
         name === ""||
-        price === undefined||
-        isNaN(+price)||
-        ingredient === undefined||
-        ingredient === ""||
-        desc === undefined||
-        desc === ""||
-        photoProduct === undefined||
-        photoProduct === ""
+        harga === undefined||
+        isNaN(+harga)||
+        bahan === undefined||
+        bahan === ""||
+        description === undefined||
+        description === ""||
+        pd_image === undefined||
+        pd_image === ""
     ) {
         return res.status(400).json("Invalid Data");
     }
@@ -56,10 +65,10 @@ async function saveProduct(req, res) {
 
         await query(
             `
-                INSERT INTO products(name,harga,bahan,description,product-image)
+                INSERT INTO products(name,harga,bahan,description,pd_image)
                 VALUES(?,?,?,?,?);
             `,
-            [name, price, ingredient, desc, photoProduct]
+            [name, harga, bahan, description, pd_image]
         );
         return res.status(200).json("berhasil menambahkan");
     } catch (error) {
@@ -68,7 +77,7 @@ async function saveProduct(req, res) {
 }
 
 async function updateProduct(req, res) {
-    const {name, price, ingredient, desc, photoProduct} = req.body;
+    const {name, harga, bahan, description, pd_image} = req.body;
     try {
         
     } catch (error) {
