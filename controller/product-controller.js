@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 
 async function getProduct(req, res) {
-    // const {name, harga, bahan, description, pd_image} = res.body;
+    // const {name, harga, bahan, description} = res.body;
     try {
         const getResponse = await query(
             `
@@ -22,7 +22,7 @@ async function getProductById(req, res) {
     try {
         const cekId = await query(
             `
-                SELECT name, harga, bahan, description, pd_image FROM products 
+                SELECT name, harga, bahan, description FROM products 
                 WHERE id = ?;
             `,
             [id]
@@ -35,7 +35,8 @@ async function getProductById(req, res) {
 }
 
 async function saveProduct(req, res) {
-    const {name, harga, bahan, description, pd_image} = req.body;
+    const {name, harga, bahan, description} = req.body;
+    const {pd_image} = req.files;
     if (
         name === undefined||
         name === ""||
@@ -44,9 +45,7 @@ async function saveProduct(req, res) {
         bahan === undefined||
         bahan === ""||
         description === undefined||
-        description === ""||
-        pd_image === undefined||
-        pd_image === ""
+        description === ""
     ) {
         return res.status(400).json("Invalid Data");
     }
@@ -65,10 +64,11 @@ async function saveProduct(req, res) {
 
         await query(
             `
-                INSERT INTO products(name,harga,bahan,description,pd_image)
+                INSERT INTO products(name,harga,bahan,description, pd_image)
                 VALUES(?,?,?,?,?);
             `,
             [name, harga, bahan, description, pd_image]
+            // [name, harga, bahan, description]
         );
         return res.status(200).json("berhasil menambahkan");
     } catch (error) {
@@ -77,7 +77,8 @@ async function saveProduct(req, res) {
 }
 
 async function updateProduct(req, res) {
-    const {name, harga, bahan, description, pd_image} = req.body;
+    const {name, harga, bahan, description} = req.body;
+    const {pd_image} = req.files;
     try {
         
     } catch (error) {
