@@ -18,17 +18,17 @@ async function getProduct(req, res) {
 }
 
 async function getProductById(req, res) {
-    const {id} = req.body;
+    // const {id} = req.body;
     try {
-        const cekId = await query(
+        const data = await query(
             `
                 SELECT name, harga, bahan, description FROM products 
                 WHERE id = ?;
             `,
-            [id]
-            // [req.params.id]
+            // [id]
+            [req.params.id]
         );
-        res.status(200).json("produk ditemukan");
+        res.status(200).json({data});
     } catch (error) {
         return res.status(400).json("Ada yang salah");
     }
@@ -36,33 +36,36 @@ async function getProductById(req, res) {
 
 async function saveProduct(req, res) {
     const {name, harga, bahan, description} = req.body;
-    const {pd_image} = req.files;
-    if (
-        name === undefined||
-        name === ""||
-        harga === undefined||
-        isNaN(+harga)||
-        bahan === undefined||
-        bahan === ""||
-        description === undefined||
-        description === ""
-    ) {
-        return res.status(400).json("Invalid Data");
-    }
+    const {pd_image} = req.body;
+
+    // WKWKWKWWKWKWK comment terus
+    // if (
+    //     name === undefined||
+    //     name === ""||
+    //     harga === undefined||
+    //     isNaN(+harga)||
+    //     bahan === undefined||
+    //     bahan === ""||
+    //     description === undefined||
+    //     description === ""
+    // ) {
+    //     return res.status(400).json("Invalid Data");
+    // }
     
     try {
         // logic handling
-        const cekNama = await query(
-            `
-            SELECT id FROM products WHERE name = ?
-            `,
-            [name]
-        );
-        if (cekNama.length > 0) {
-            return res.status(400).json("nama produk telah ada");
-        }
 
-        await query(
+        // const cekNama = await query(
+        //     `
+        //     SELECT id FROM products WHERE name = ?
+        //     `,
+        //     [name]
+        // );
+        // if (cekNama.length > 0) {
+        //     return res.status(400).json("nama produk telah ada");
+        // }
+
+        const {DataProduct:id} = await query(
             `
                 INSERT INTO products(name,harga,bahan,description, pd_image)
                 VALUES(?,?,?,?,?);
@@ -70,7 +73,16 @@ async function saveProduct(req, res) {
             [name, harga, bahan, description, pd_image]
             // [name, harga, bahan, description]
         );
-        return res.status(200).json("berhasil menambahkan");
+        // if (name.affectedRows > 0) {
+        //     return res.status(404).json("Data sudah ada");
+        // }
+        return res.status(200).json({
+            message: "berhasil menyimpan produk",
+            data:{
+                id,
+                ...req.body
+            },
+        });
     } catch (error) {
         return res.status(400).json("Ada yang salah");
     }
@@ -78,17 +90,30 @@ async function saveProduct(req, res) {
 
 async function updateProduct(req, res) {
     const {name, harga, bahan, description} = req.body;
-    const {pd_image} = req.files;
+    const {pd_image} = req.body;
     try {
-        const updateStok = await query(
+        const ubahData = await query(
             `
             UPDATE products SET
             name = ?, harga = ?, bahan = ?, description = ?, pd_image = ?
             WHERE id = ?;
             `,
-            [name,harga, bahan, description, pd_image]
+            [req.params.id,name,harga, bahan, description, pd_image]
         );
-        return res.status(200).json("Data telah diubah");
+
+        if (ubahData.affectedRows === 0) {
+            return res.status(400).json({
+                message: `Data dengan id ${req.params.id} tidak ada`
+            })
+        }
+
+        return res.status(200).json({
+            message:"Update data berhasil",
+            data:{
+                id:req.params.id,
+                ...req.body
+            }
+        });
     } catch (error) {
         return res.status(400).json("Ada yang salah");
     }
@@ -96,7 +121,22 @@ async function updateProduct(req, res) {
 
 async function deleteProduct(req, res) {
     try {
-        
+        const deleteData = await query(
+            `
+                DELETE FROM products
+                WHERE id = ?;
+            `,
+            [req.params.id]
+        );
+        if (deleteData.affectedRows === 0) {
+            return res.status(404).json("Data tidak ada dan tidak dapat dihapus");
+        }
+        return res.status(200).json({
+            message: "Data berhasil dihapus",
+            data:{
+                id:req.params.id
+            }
+        });
     } catch (error) {
         return res.status(400).json("Ada yang salah");
     }
