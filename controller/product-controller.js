@@ -80,7 +80,15 @@ async function updateProduct(req, res) {
     const {name, harga, bahan, description} = req.body;
     const {pd_image} = req.files;
     try {
-        
+        const updateStok = await query(
+            `
+            UPDATE products SET
+            name = ?, harga = ?, bahan = ?, description = ?, pd_image = ?
+            WHERE id = ?;
+            `,
+            [name,harga, bahan, description, pd_image]
+        );
+        return res.status(200).json("Data telah diubah");
     } catch (error) {
         return res.status(400).json("Ada yang salah");
     }
@@ -99,5 +107,5 @@ module.exports = {
     getProductById,
     saveProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
 }
