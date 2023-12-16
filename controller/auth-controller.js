@@ -1,6 +1,7 @@
 const query = require("../database");
 const {randomUUID} = require("crypto");
 const bcryptjs = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 async function register(req, res) {
     const{nama_depan, nama_belakang, email, password, no_handphone} = req.body;
